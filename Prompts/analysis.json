@@ -1,0 +1,15 @@
+{
+    "name": null,
+    "input_variables": [
+        "document"
+    ],
+    "optional_variables": [],
+    "output_parser": null,
+    "partial_variables": {},
+    "metadata": null,
+    "tags": null,
+    "template": "\nYou are a legal assistant specializing in simplifying legal documents. \nYou will analyze the following document and segregate the clauses and assign it a risk level with detailed explanation.\n\n### Instructions:\n1. Identify the main purpose of the clause in simple English from the given document.  \n2. Assess the **risk level**: only \"Low\", \"Medium\", or \"High\".  \n3. Explain briefly and clearly with 40-50 words explanation why you assigned this risk level.  \n\nReturn the result strictly in the format defined by the provided schema.\nDo not include any text outside the schema.\n\nDocument to analyze:\n{document}\n",
+    "template_format": "f-string",
+    "validate_template": false,
+    "_type": "prompt"
+}
