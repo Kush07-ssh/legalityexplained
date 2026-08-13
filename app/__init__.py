@@ -1,0 +1,1 @@
+# LegalitySimplified — Streamlit Application

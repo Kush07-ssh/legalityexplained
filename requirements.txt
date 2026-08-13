@@ -1,0 +1,30 @@
+# ── Core App ──
+streamlit>=1.30.0
+python-dotenv>=1.0.0
+pydantic>=2.0.0
+
+# ── LangChain Stack ──
+langchain>=0.2.0
+langchain-core>=0.2.0
+langchain-google-genai>=1.0.0
+langchain-huggingface>=0.0.3
+langchain-community>=0.2.0
+langchain-text-splitters>=0.2.0
+
+# ── Vector Store ──
+chromadb>=0.4.0
+
+# ── Document Loaders ──
+pypdf>=4.0.0
+
+# ── Embeddings ──
+sentence-transformers>=2.2.0
+
+# ── BERT Fine-Tuning ──
+torch>=2.0.0
+transformers>=4.35.0
+datasets>=2.14.0
+accelerate>=0.25.0
+scikit-learn>=1.3.0
+numpy>=1.24.0
+pandas>=2.0.0

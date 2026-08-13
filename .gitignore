@@ -1,3 +1,33 @@
+# Environment
 .env
 
+# Database
 database/
+
+# Fine-tuned models
+models/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Experiment tracking
+wandb/
+runs/
+
+# Jupyter
+.ipynb_checkpoints/
