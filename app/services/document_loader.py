@@ -19,8 +19,8 @@ def load_files_from_uploads(uploaded_files: list) -> List[Document]:
     """
     Load content from a list of Streamlit uploaded files (PDFs or TXTs).
 
-    Each file is written to a temporary location for the loader to read,
-    then the temp file is cleaned up.
+    Each file is written to a temporary location for the loader to read.
+    If a PDF contains no text (e.g. scanned images), it falls back to OCR using Tesseract.
     """
     all_docs = []
 
@@ -37,7 +37,26 @@ def load_files_from_uploads(uploaded_files: list) -> List[Document]:
                 all_docs.extend(loader.load())
             elif suffix == ".pdf":
                 loader = PyPDFLoader(tmp_path)
-                all_docs.extend(loader.load())
+                docs = loader.load()
+                
+                # Check if it's a scanned PDF (empty text)
+                extracted_text = "".join([d.page_content for d in docs]).strip()
+                if len(extracted_text) < 50:
+                    import streamlit as st
+                    st.info(f"Scanned document detected ({file.name}). Performing OCR... This may take a moment.")
+                    try:
+                        from pdf2image import convert_from_path
+                        import pytesseract
+                        
+                        docs = []
+                        images = convert_from_path(tmp_path)
+                        for i, img in enumerate(images):
+                            text = pytesseract.image_to_string(img)
+                            docs.append(Document(page_content=text, metadata={"page": i}))
+                    except Exception as e:
+                        st.error(f"OCR failed. Please ensure poppler and tesseract are installed. Error: {e}")
+                
+                all_docs.extend(docs)
         finally:
             os.remove(tmp_path)
 
