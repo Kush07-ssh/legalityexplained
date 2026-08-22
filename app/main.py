@@ -61,7 +61,7 @@ st.markdown("""
         font-weight: bold;
     }
     .gradient-text {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        background: linear-gradient(135deg, cyan 0%, blue 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800;
@@ -84,8 +84,8 @@ if "financial_analysis_done" not in st.session_state:
     st.session_state.fin_message_history = []
 
 # ── Header ───────────────────────────────────────────────────────────────────
-st.markdown('<h1 class="gradient-text">⚖️ LegalitySimplified</h1>', unsafe_allow_html=True)
-st.markdown('<h3 style="color: #64748b; font-weight: 400;">Next-Gen Legal and Financial Risk Management Platform</h3>', unsafe_allow_html=True)
+st.markdown('<h1 class="gradient-text">⚖️ Legality Simplified</h1>', unsafe_allow_html=True)
+st.markdown('<h3 style="color: white; font-weight: 400;">Legal and Financial Risk Management Platform</h3>', unsafe_allow_html=True)
 
 tab1, tab2 = st.tabs(["Legal Document Analysis", "Financial Risk Management"])
 
