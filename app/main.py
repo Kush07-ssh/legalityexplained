@@ -135,12 +135,26 @@ with tab1:
                 if clause_type != "—":
                     header += f" (Type: {clause_type} | Confidence: {confidence})"
 
-                with st.expander(header):
-                    if clause_type != "—":
-                        st.markdown(f"**Clause Type (BERT):** {clause_type}")
-                        st.markdown(f"**Classification Confidence:** {confidence}")
-                    st.markdown(f"**Risk Level:** {risk_display}")
-                    st.markdown(f"**Explanation:** {explanation}")
+                if risk == "High":
+                    color = "#ef4444"
+                    bg_color = "#fef2f2"
+                elif risk == "Medium":
+                    color = "#f59e0b"
+                    bg_color = "#fffbeb"
+                else:
+                    color = "#10b981"
+                    bg_color = "#ecfdf5"
+
+                st.markdown(f"""
+                <div style="border-left: 6px solid {color}; padding: 15px; margin-bottom: 15px; background-color: {bg_color}; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h4 style="margin: 0; color: #1e3a8a; font-size: 18px;">{clause_name}</h4>
+                        <span style="background-color: {color}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 14px; font-weight: 600;">{risk} Risk</span>
+                    </div>
+                    <p style="margin: 5px 0;"><strong>Type:</strong> {clause_type} ({confidence})</p>
+                    <p style="margin: 5px 0; font-size: 15px;">{explanation}</p>
+                </div>
+                """, unsafe_allow_html=True)
 
     # ── Chat Section ─────────────────────────────────────────────────────────────
     if st.session_state.analysis_done:
@@ -220,16 +234,27 @@ with tab2:
         
         st.markdown("#### ⚠️ Key Risk Factors Identified")
         if result.risk_factors:
-            risk_data = [
-                {
-                    "Risk Factor": r.factor_name,
-                    "Severity": r.severity,
-                    "Affected Metric": r.affected_metric,
-                    "Description": r.description
-                }
-                for r in result.risk_factors
-            ]
-            st.table(risk_data)
+            for r in result.risk_factors:
+                if r.severity in ["High", "Critical"]:
+                    color = "#ef4444" # red
+                    bg_color = "#fef2f2"
+                elif r.severity == "Medium":
+                    color = "#f59e0b" # yellow/orange
+                    bg_color = "#fffbeb"
+                else:
+                    color = "#10b981" # green
+                    bg_color = "#ecfdf5"
+                
+                st.markdown(f"""
+                <div style="border-left: 6px solid {color}; padding: 15px; margin-bottom: 15px; background-color: {bg_color}; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h4 style="margin: 0; color: #1e3a8a;">{r.factor_name}</h4>
+                        <span style="background-color: {color}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 14px; font-weight: 600;">{r.severity} Risk</span>
+                    </div>
+                    <p style="margin: 5px 0;"><strong>📉 Affected Metric:</strong> {r.affected_metric}</p>
+                    <p style="margin: 5px 0; font-size: 15px;">{r.description}</p>
+                </div>
+                """, unsafe_allow_html=True)
             
         st.markdown("#### 💡 Recommended Mitigation Strategies")
         if result.mitigation_strategies:
