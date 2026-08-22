@@ -79,38 +79,56 @@ def _analyze_with_bert(
         # BERT classification
         predictions = classifier.predict(text)
 
+        # Collect tasks for Gemini
+        tasks = []
         for clause_type, confidence in predictions:
-            # Skip if we've already assessed this clause type
             if clause_type in seen_clauses:
                 continue
             seen_clauses.add(clause_type)
+            tasks.append((clause_type, confidence))
+            
+        if not tasks:
+            continue
 
-            # Gemini risk assessment for this identified clause
+        # Execute Gemini API calls concurrently
+        import concurrent.futures
+
+        def assess_clause(c_type, conf, c_text):
             try:
                 llm_with_structure = llm.with_structured_output(DocumentAnalysis)
                 chain = analysis_with_bert_prompt | llm_with_structure
-                result = chain.invoke({
-                    "clause_type": clause_type,
-                    "clause_text": text,
+                res = chain.invoke({
+                    "clause_type": c_type,
+                    "clause_text": c_text,
                 })
-
-                for clause in result.clauses:
-                    all_rows.append({
+                
+                rows = []
+                for clause in res.clauses:
+                    rows.append({
                         "Clause": clause.clause,
-                        "Clause Type": clause_type,
-                        "Confidence": f"{confidence:.0%}",
+                        "Clause Type": c_type,
+                        "Confidence": f"{conf:.0%}",
                         "Risk Level": clause.risk_level,
                         "Detailed Explanation": clause.detailed_explanation,
                     })
+                return rows
             except Exception as e:
-                # If Gemini fails for one clause, still continue
-                all_rows.append({
-                    "Clause": clause_type,
-                    "Clause Type": clause_type,
-                    "Confidence": f"{confidence:.0%}",
+                return [{
+                    "Clause": c_type,
+                    "Clause Type": c_type,
+                    "Confidence": f"{conf:.0%}",
                     "Risk Level": "Unknown",
                     "Detailed Explanation": f"Risk assessment failed: {str(e)}",
-                })
+                }]
+
+        # Use max_workers=3 to avoid hitting Gemini free-tier rate limits (HTTP 429)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            future_to_clause = {
+                executor.submit(assess_clause, c_type, conf, text): c_type 
+                for c_type, conf in tasks
+            }
+            for future in concurrent.futures.as_completed(future_to_clause):
+                all_rows.extend(future.result())
 
     return all_rows
 

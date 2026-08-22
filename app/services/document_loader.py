@@ -47,12 +47,21 @@ def load_files_from_uploads(uploaded_files: list) -> List[Document]:
                     try:
                         from pdf2image import convert_from_path
                         import pytesseract
+                        import concurrent.futures
                         
-                        docs = []
                         images = convert_from_path(tmp_path)
-                        for i, img in enumerate(images):
+                        docs = [None] * len(images)
+                        
+                        def process_page(idx, img):
                             text = pytesseract.image_to_string(img)
-                            docs.append(Document(page_content=text, metadata={"page": i}))
+                            return idx, Document(page_content=text, metadata={"page": idx})
+                            
+                        # Use ThreadPoolExecutor to process multiple pages simultaneously
+                        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+                            futures = [executor.submit(process_page, i, img) for i, img in enumerate(images)]
+                            for future in concurrent.futures.as_completed(futures):
+                                idx, doc = future.result()
+                                docs[idx] = doc
                     except Exception as e:
                         st.error(f"OCR failed. Please ensure poppler and tesseract are installed. Error: {e}")
                 
