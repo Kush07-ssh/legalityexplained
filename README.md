@@ -1,32 +1,33 @@
-# ⚖️ LegalitySimplified
+# ⚖️ LegalitySimplified & Financial Risk Manager
 
-**Demystifying Legal Documents with AI** — Upload contracts, agreements, and policy documents to get instant clause classification, risk analysis, plain-English summaries, and interactive Q&A.
+**Demystifying Legal and Financial Documents with AI** — Upload contracts, agreements, policies, and financial reports to get instant clause classification, financial risk assessment, plain-English summaries, and interactive Q&A.
 
 ## 🏗️ Architecture
 
 ```
-Document Upload → Text Extraction → Preprocessing
-                                          │
-                    ┌─────────────────────┴─────────────────────┐
-                    ▼                                           ▼
-            BERT Classifier                              ChromaDB Vector Store
-        (Clause Type Detection)                          (For Chat/RAG)
-                    │                                           │
-                    ▼                                           ▼
-            Gemini (Risk Assessment                    Gemini (RAG Chat)
-             + Explanation)                                     │
-                    │                                           ▼
-                    ▼                                   Interactive Q&A
-        Risk Analysis Dashboard
-                    │
-                    ▼
-            Gemini (Document Summary)
+Document Upload (Legal & Financial) → Text Extraction → Preprocessing
+                                           │
+                     ┌─────────────────────┴─────────────────────┐
+                     ▼                                           ▼
+             BERT Classifier                              ChromaDB Vector Store
+         (Clause Type Detection)                          (For Chat/RAG)
+                     │                                           │
+                     ▼                                           ▼
+             Gemini (Risk Assessment                    Gemini (RAG Chat)
+              + Explanation)                                     │
+                     │                                           ▼
+                     ▼                                   Interactive Q&A
+         Risk Analysis Dashboard
+             (Legal & Financial)
+                     │
+                     ▼
+             Gemini (Document Summary)
 ```
 
 ### Hybrid AI Pipeline
-- **Legal-BERT** (fine-tuned on [CUAD](https://huggingface.co/datasets/theatticusproject/cuad)) → Classifies text into 41 legal clause types
-- **Gemini 2.5 Flash** → Risk assessment, plain-English explanations, document summarization, and chat
-- **ChromaDB + MiniLM-L6** → Vector store for RAG-based document Q&A
+- **Legal-BERT** (fine-tuned on [CUAD](https://huggingface.co/datasets/theatticusproject/cuad)) → Classifies text into 41 legal clause types.
+- **Gemini 2.5 Flash / 1.5 Pro** → Legal risk assessment, financial risk scoring, plain-English explanations, document summarization, mitigation strategies, and context-aware chat.
+- **ChromaDB + MiniLM-L6** → Vector store for RAG-based document Q&A.
 
 ## 📁 Project Structure
 
@@ -35,13 +36,14 @@ Finance/
 ├── app/                          # Streamlit application
 │   ├── main.py                   # UI entry point
 │   ├── config.py                 # Centralized configuration
-│   ├── models/schemas.py         # Pydantic schemas
+│   ├── models/schemas.py         # Pydantic schemas for Legal & Financial Risk
 │   ├── prompts/                  # LLM prompt templates
 │   │   ├── analysis_prompt.py
 │   │   ├── summary_prompt.py
 │   │   └── chat_prompt.py
 │   └── services/                 # Business logic
-│       ├── analyzer.py           # Hybrid BERT+Gemini clause analysis
+│       ├── analyzer.py           # Hybrid BERT+Gemini legal clause analysis
+│       ├── financial_analyzer.py # Financial risk assessment and strategy generation
 │       ├── summarizer.py         # Document summarization
 │       ├── chat.py               # RAG chat service
 │       ├── document_loader.py    # File loading & preprocessing
@@ -83,7 +85,7 @@ python -m bert.fine_tune --dry-run
 python -m bert.fine_tune --epochs 3 --lr 3e-5
 ```
 
-> **Note:** The app works without BERT — it falls back to Gemini-only mode. But BERT provides faster, more consistent clause classification.
+> **Note:** The app works without BERT — it falls back to Gemini-only mode. But BERT provides faster, more consistent legal clause classification.
 
 ### 4. Run the App
 ```bash
@@ -91,6 +93,19 @@ python run.py
 # or
 streamlit run app/main.py
 ```
+
+## 🌟 Core Features
+
+### 📄 Legal Document Analysis
+- **Automated Clause Detection**: Uses a fine-tuned BERT model to instantly identify up to 41 different legal clauses (Termination, Governing Law, Exclusivity, etc.).
+- **Risk Assessment**: Gemini analyzes each clause to assign a risk severity (Low, Medium, High) and provides a 50-word plain-English explanation.
+- **RAG Chatbot**: Chat directly with your contracts to ask specific questions about the context and risks.
+
+### 📈 Financial Risk Management
+- **Numerical Risk Scoring**: Upload financial reports (PDF, CSV, TXT) and receive an automated Risk Score (out of 100) indicating the overall financial health of the entity.
+- **Key Risk Factors**: Automatically extracts a structured table of specific red flags (e.g., liquidity issues, debt-to-equity imbalances) along with their severities.
+- **Mitigation Strategies**: Provides actionable, short-to-long-term strategies to improve financial stability and mitigate the identified risks.
+- **Context-Aware Q&A**: The chatbot remembers your specific financial risks and summary, allowing you to ask detailed follow-up questions about mitigation implementation.
 
 ## 🧠 BERT Fine-Tuning Details
 
@@ -103,16 +118,13 @@ streamlit run app/main.py
 | LR Schedule | Cosine with warmup |
 | Metrics | F1 (micro/macro), Precision, Recall |
 
-### CUAD Clause Types (41)
-Termination, Indemnification, Governing Law, Non-Compete, Exclusivity, IP Ownership, License Grant, Confidentiality, Revenue Sharing, Audit Rights, Liability Caps, and 30 more.
-
 ## 🛠️ Tech Stack
 
 | Component | Technology |
 |---|---|
 | Frontend | Streamlit |
 | Clause Classification | Legal-BERT (fine-tuned) |
-| Risk Assessment & Summary | Gemini 2.5 Flash |
-| Vector Store | ChromaDB |
+| Risk Assessment & Summary | Gemini 1.5 Pro / 2.5 Flash |
+| Vector Store | ChromaDB (langchain-chroma) |
 | Embeddings | MiniLM-L6-v2 |
 | Framework | LangChain |

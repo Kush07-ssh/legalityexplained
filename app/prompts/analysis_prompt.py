@@ -59,3 +59,27 @@ analysis_fallback_prompt = PromptTemplate(
     template=ANALYSIS_FALLBACK_TEMPLATE,
     input_variables=["document"],
 )
+
+# ── Financial Risk Prompt ────────────────────────────────────────────────────
+FINANCIAL_RISK_TEMPLATE = """\
+You are an expert financial analyst and risk manager. Analyze the following financial report data
+and assess the current risk level, calculate a numerical risk score, identify key risk factors, and provide actionable mitigation strategies.
+
+### Instructions:
+1. Assess the **overall_risk_level**: only "Low", "Medium", or "High".
+2. Calculate a **risk_score_100**: an integer from 1 to 100 representing the risk of failure (100 is extremely high risk).
+3. Provide a brief **summary_explanation** (50-100 words).
+4. Identify up to 5 key **risk_factors**. For each, provide the name, severity, detailed description, and the affected financial metric.
+5. Recommend 3-5 practical **mitigation_strategies**. For each, provide the strategy name, description, expected impact, and implementation timeframe.
+
+Return the result strictly in the format defined by the provided schema.
+Do not include any text outside the schema.
+
+Financial Report Data:
+{document}
+"""
+
+financial_risk_prompt = PromptTemplate(
+    template=FINANCIAL_RISK_TEMPLATE,
+    input_variables=["document"],
+)

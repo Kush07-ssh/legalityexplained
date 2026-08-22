@@ -22,7 +22,7 @@ def format_docs_as_context(docs) -> str:
     return "\n\n".join(parts)
 
 
-def chat(query: str, chat_history: list) -> str:
+def chat(query: str, chat_history: list, analysis_context: str = "") -> str:
     """
     Process a user query against the document vector store.
 
@@ -32,6 +32,8 @@ def chat(query: str, chat_history: list) -> str:
         The user's question.
     chat_history : list
         List of HumanMessage/AIMessage objects.
+    analysis_context : str
+        Previously generated AI analysis to provide additional context.
 
     Returns
     -------
@@ -41,7 +43,7 @@ def chat(query: str, chat_history: list) -> str:
     vector_store = get_vectorstore()
     retriever = vector_store.as_retriever(search_type="mmr", search_kwargs={"k": 3})
 
-    docs = retriever.get_relevant_documents(query)
+    docs = retriever.invoke(query)
     context_text = format_docs_as_context(docs)
 
     llm = ChatGoogleGenerativeAI(
@@ -54,6 +56,7 @@ def chat(query: str, chat_history: list) -> str:
         "context": context_text,
         "question": query,
         "chat_history": chat_history,
+        "analysis_context": analysis_context,
     })
 
     return result

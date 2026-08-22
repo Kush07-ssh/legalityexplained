@@ -9,11 +9,14 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 rag_prompt = ChatPromptTemplate.from_messages([
     ("system", (
-        "You are a helpful legal assistant. Always prioritize the given CONTEXT when answering. "
+        "You are a helpful expert assistant. Always prioritize the given CONTEXT when answering. "
         "If the user asks something not covered in the context, you may use your general knowledge "
         "to provide a clear and helpful answer. "
         "If it's a casual message (like greetings or small talk), respond naturally.\n\n"
-        "CONTEXT:\n{context}"
+        "AI ANALYSIS RESULTS (Previously generated analysis of the document):\n"
+        "{analysis_context}\n\n"
+        "DOCUMENT RELEVANT CONTEXT (From vector search):\n"
+        "{context}"
     )),
     MessagesPlaceholder(variable_name="chat_history"),
     ("human", "{question}"),
