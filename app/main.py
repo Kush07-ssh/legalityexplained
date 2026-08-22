@@ -110,117 +110,119 @@ with tab1:
 
     # ── Results Display ──────────────────────────────────────────────────────────
     if st.session_state.analysis_done:
-        col1, col2 = st.columns(2)
-
-        with col1:
-            if st.button("Show Document Summary", use_container_width=True):
-                st.session_state.show_summary = not st.session_state.show_summary
-                st.session_state.show_risk_analysis = False
-
-        with col2:
-            if st.button("Show Risk Level Analysis", use_container_width=True):
-                st.session_state.show_risk_analysis = not st.session_state.show_risk_analysis
-                st.session_state.show_summary = False
-
-        # ── Summary View ─────────────────────────────────────────────────────
-        if st.session_state.show_summary:
-            st.markdown("### Document Summary")
-            st.write(st.session_state.summary_text)
-
-        # ── Risk Analysis View ───────────────────────────────────────────────
-        if st.session_state.show_risk_analysis:
-            st.markdown("### Risk Level Analysis")
-
-            # ── Graph: Risk Breakdown ──
-            risk_counts = {"High": 0, "Medium": 0, "Low": 0}
-            for row in st.session_state.all_rows:
-                r_level = row.get("Risk Level", "Unknown")
-                if r_level in risk_counts:
-                    risk_counts[r_level] += 1
-            
-            # Draw bar chart
-            fig_bar = px.bar(
-                x=list(risk_counts.keys()), 
-                y=list(risk_counts.values()),
-                labels={'x': 'Risk Severity', 'y': 'Number of Clauses'},
-                title="Clause Risk Breakdown",
-                color=list(risk_counts.keys()),
-                color_discrete_map={"High": "#ef4444", "Medium": "#f59e0b", "Low": "#10b981"}
-            )
-            fig_bar.update_layout(showlegend=False, height=350, margin=dict(l=0, r=0, t=40, b=0))
-            st.plotly_chart(fig_bar, use_container_width=True)
-
-            risk_colors = {
-                "High": "High Risk",
-                "Medium": "Medium Risk",
-                "Low": "Low Risk",
-            }
-
-            for i, row in enumerate(st.session_state.all_rows, start=1):
-                risk = row.get("Risk Level", "Unknown")
-                risk_display = risk_colors.get(risk, "Unknown")
-                clause_name = row.get("Clause", "Unnamed Clause")
-                clause_type = row.get("Clause Type", "—")
-                confidence = row.get("Confidence", "—")
-                explanation = row.get("Detailed Explanation", "No explanation available.")
-
-                header = f"{clause_name} - {risk_display}"
-                if clause_type != "—":
-                    header += f" (Type: {clause_type} | Confidence: {confidence})"
-
-                if risk == "High":
-                    color = "#ef4444"
-                    bg_color = "#fef2f2"
-                elif risk == "Medium":
-                    color = "#f59e0b"
-                    bg_color = "#fffbeb"
-                else:
-                    color = "#10b981"
-                    bg_color = "#ecfdf5"
-
-                st.markdown(f"""
-                <div style="border-left: 6px solid {color}; padding: 18px; margin-bottom: 20px; background-color: {bg_color}; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s ease;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
-                        <h4 style="margin: 0; color: #1e3a8a; font-size: 20px; font-weight: 700;">{clause_name}</h4>
-                        <span style="background-color: {color}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 4px {color}40;">{risk} Risk</span>
-                    </div>
-                    <div style="color: #1f2937;">
-                        <p style="margin: 8px 0; font-size: 15px;"><strong>🏷️ Classification:</strong> <span style="background-color: rgba(0,0,0,0.05); padding: 3px 8px; border-radius: 4px;">{clause_type}</span> <span style="font-size: 0.9em; color: #6b7280;">({confidence})</span></p>
-                        <p style="margin: 12px 0 0 0; font-size: 16px; line-height: 1.6;"><strong>⚠️ Detailed Analysis:</strong><br/>{explanation}</p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-
-    # ── Chat Section ─────────────────────────────────────────────────────────────
-    if st.session_state.analysis_done:
         st.divider()
-        st.markdown("### Document Q&A")
+        col_results, col_chat = st.columns([1.5, 1], gap="large")
 
-        for msg in st.session_state.message_history:
-            role = "user" if isinstance(msg, HumanMessage) else "assistant"
-            with st.chat_message(role):
-                st.write(msg.content)
+        with col_results:
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("Show Document Summary", use_container_width=True, key="legal_sum_btn"):
+                    st.session_state.show_summary = not st.session_state.show_summary
+                    st.session_state.show_risk_analysis = False
 
-        if user_input := st.chat_input("Enter your query regarding the legal document...", key="legal_chat"):
-            with st.chat_message("user"):
-                st.write(user_input)
+            with col2:
+                if st.button("Show Risk Level Analysis", use_container_width=True, key="legal_risk_btn"):
+                    st.session_state.show_risk_analysis = not st.session_state.show_risk_analysis
+                    st.session_state.show_summary = False
 
-            with st.spinner("Processing query..."):
-                analysis_context = "Document Summary:\n" + st.session_state.summary_text + "\n\nIdentified Clause Risks:\n"
+            # ── Summary View ─────────────────────────────────────────────────────
+            if st.session_state.show_summary:
+                st.markdown("### Document Summary")
+                st.write(st.session_state.summary_text)
+
+            # ── Risk Analysis View ───────────────────────────────────────────────
+            if st.session_state.show_risk_analysis:
+                st.markdown("### Risk Level Analysis")
+
+                # ── Graph: Risk Breakdown ──
+                risk_counts = {"High": 0, "Medium": 0, "Low": 0}
                 for row in st.session_state.all_rows:
-                    analysis_context += f"- {row.get('Clause', '')} ({row.get('Risk Level', '')} Risk): {row.get('Detailed Explanation', '')}\n"
-
-                assistant_response = chat(
-                    query=user_input,
-                    chat_history=st.session_state.message_history,
-                    analysis_context=analysis_context,
+                    r_level = row.get("Risk Level", "Unknown")
+                    if r_level in risk_counts:
+                        risk_counts[r_level] += 1
+                
+                fig_bar = px.bar(
+                    x=list(risk_counts.keys()), 
+                    y=list(risk_counts.values()),
+                    labels={'x': 'Risk Severity', 'y': 'Number of Clauses'},
+                    title="Clause Risk Breakdown",
+                    color=list(risk_counts.keys()),
+                    color_discrete_map={"High": "#ef4444", "Medium": "#f59e0b", "Low": "#10b981"}
                 )
+                fig_bar.update_layout(showlegend=False, height=350, margin=dict(l=0, r=0, t=40, b=0))
+                st.plotly_chart(fig_bar, use_container_width=True)
 
-            with st.chat_message("assistant"):
-                st.write(assistant_response)
+                risk_colors = {
+                    "High": "High Risk",
+                    "Medium": "Medium Risk",
+                    "Low": "Low Risk",
+                }
 
-            st.session_state.message_history.append(HumanMessage(content=user_input))
-            st.session_state.message_history.append(AIMessage(content=assistant_response))
+                for i, row in enumerate(st.session_state.all_rows, start=1):
+                    risk = row.get("Risk Level", "Unknown")
+                    risk_display = risk_colors.get(risk, "Unknown")
+                    clause_name = row.get("Clause", "Unnamed Clause")
+                    clause_type = row.get("Clause Type", "—")
+                    confidence = row.get("Confidence", "—")
+                    explanation = row.get("Detailed Explanation", "No explanation available.")
+
+                    if risk == "High":
+                        color = "#ef4444"
+                        bg_color = "#fef2f2"
+                    elif risk == "Medium":
+                        color = "#f59e0b"
+                        bg_color = "#fffbeb"
+                    else:
+                        color = "#10b981"
+                        bg_color = "#ecfdf5"
+
+                    st.markdown(f"""
+                    <div style="border-left: 6px solid {color}; padding: 18px; margin-bottom: 20px; background-color: {bg_color}; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
+                            <h4 style="margin: 0; color: #1e3a8a; font-size: 20px; font-weight: 700;">{clause_name}</h4>
+                            <span style="background-color: {color}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 4px {color}40;">{risk} Risk</span>
+                        </div>
+                        <div style="color: #1f2937;">
+                            <p style="margin: 8px 0; font-size: 15px;"><strong>🏷️ Classification:</strong> <span style="background-color: rgba(0,0,0,0.05); padding: 3px 8px; border-radius: 4px;">{clause_type}</span> <span style="font-size: 0.9em; color: #6b7280;">({confidence})</span></p>
+                            <p style="margin: 12px 0 0 0; font-size: 16px; line-height: 1.6;"><strong>⚠️ Detailed Analysis:</strong><br/>{explanation}</p>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+        # ── Chat Section ─────────────────────────────────────────────────────────────
+        with col_chat:
+            st.markdown("### 💬 Document Q&A Bot")
+            st.info("Ask me anything about the uploaded legal documents!")
+
+            # Use a container for chat history so it scrolls nicely
+            chat_container = st.container(height=500)
+            with chat_container:
+                for msg in st.session_state.message_history:
+                    role = "user" if isinstance(msg, HumanMessage) else "assistant"
+                    with st.chat_message(role):
+                        st.write(msg.content)
+
+            if user_input := st.chat_input("Enter your query regarding the legal document...", key="legal_chat"):
+                with chat_container:
+                    with st.chat_message("user"):
+                        st.write(user_input)
+
+                    with st.spinner("Processing query..."):
+                        analysis_context = "Document Summary:\n" + st.session_state.summary_text + "\n\nIdentified Clause Risks:\n"
+                        for row in st.session_state.all_rows:
+                            analysis_context += f"- {row.get('Clause', '')} ({row.get('Risk Level', '')} Risk): {row.get('Detailed Explanation', '')}\n"
+
+                        assistant_response = chat(
+                            query=user_input,
+                            chat_history=st.session_state.message_history,
+                            analysis_context=analysis_context,
+                        )
+
+                    with st.chat_message("assistant"):
+                        st.write(assistant_response)
+
+                st.session_state.message_history.append(HumanMessage(content=user_input))
+                st.session_state.message_history.append(AIMessage(content=assistant_response))
 
 
 with tab2:
@@ -241,113 +243,122 @@ with tab2:
             st.session_state.financial_analysis_done = True
 
     if st.session_state.financial_analysis_done:
-        st.markdown("### Financial Risk Assessment")
+        st.divider()
+        col_results, col_chat = st.columns([1.5, 1], gap="large")
         
-        result = st.session_state.financial_result
-        
-        col_score, col_summary = st.columns([1, 2])
-        
-        with col_score:
-            fig_gauge = go.Figure(go.Indicator(
-                mode = "gauge+number",
-                value = result.risk_score_100,
-                domain = {'x': [0, 1], 'y': [0, 1]},
-                title = {'text': "Financial Risk Score"},
-                gauge = {
-                    'axis': {'range': [None, 100]},
-                    'bar': {'color': "#1e3a8a"},
-                    'steps': [
-                        {'range': [0, 30], 'color': "#ecfdf5"},
-                        {'range': [30, 70], 'color': "#fffbeb"},
-                        {'range': [70, 100], 'color': "#fef2f2"}
-                    ],
-                    'threshold': {
-                        'line': {'color': "red", 'width': 4},
-                        'thickness': 0.75,
-                        'value': result.risk_score_100
+        with col_results:
+            st.markdown("### Financial Risk Assessment")
+            
+            result = st.session_state.financial_result
+            
+            col_score, col_summary = st.columns([1, 2])
+            
+            with col_score:
+                fig_gauge = go.Figure(go.Indicator(
+                    mode = "gauge+number",
+                    value = result.risk_score_100,
+                    domain = {'x': [0, 1], 'y': [0, 1]},
+                    title = {'text': "Financial Risk Score"},
+                    gauge = {
+                        'axis': {'range': [None, 100]},
+                        'bar': {'color': "#1e3a8a"},
+                        'steps': [
+                            {'range': [0, 30], 'color': "#ecfdf5"},
+                            {'range': [30, 70], 'color': "#fffbeb"},
+                            {'range': [70, 100], 'color': "#fef2f2"}
+                        ],
+                        'threshold': {
+                            'line': {'color': "red", 'width': 4},
+                            'thickness': 0.75,
+                            'value': result.risk_score_100
+                        }
                     }
-                }
-            ))
-            fig_gauge.update_layout(height=250, margin=dict(l=10, r=10, t=40, b=10))
-            st.plotly_chart(fig_gauge, use_container_width=True)
-            
-            st.metric(
-                label="Overall Severity",
-                value=result.overall_risk_level
-            )
-
-        with col_summary:
-            st.markdown("**Executive Summary**")
-            st.info(result.summary_explanation)
-            
-        st.divider()
-        
-        st.markdown("#### ⚠️ Key Risk Factors Identified")
-        if result.risk_factors:
-            for r in result.risk_factors:
-                if r.severity in ["High", "Critical"]:
-                    color = "#ef4444" # red
-                    bg_color = "#fef2f2"
-                elif r.severity == "Medium":
-                    color = "#f59e0b" # yellow/orange
-                    bg_color = "#fffbeb"
-                else:
-                    color = "#10b981" # green
-                    bg_color = "#ecfdf5"
+                ))
+                fig_gauge.update_layout(height=250, margin=dict(l=10, r=10, t=40, b=10))
+                st.plotly_chart(fig_gauge, use_container_width=True)
                 
-                st.markdown(f"""
-                <div style="border-left: 6px solid {color}; padding: 18px; margin-bottom: 20px; background-color: {bg_color}; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s ease;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
-                        <h4 style="margin: 0; color: #1e3a8a; font-size: 18px; font-weight: 700;">{r.factor_name}</h4>
-                        <span style="background-color: {color}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 4px {color}40;">{r.severity} Risk</span>
-                    </div>
-                    <div style="color: #1f2937;">
-                        <p style="margin: 8px 0; font-size: 15px;"><strong>📉 Affected Metric:</strong> <span style="background-color: rgba(0,0,0,0.05); padding: 3px 8px; border-radius: 4px;">{r.affected_metric}</span></p>
-                        <p style="margin: 12px 0 0 0; font-size: 16px; line-height: 1.6;"><strong>⚠️ Details:</strong><br/>{r.description}</p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-        st.markdown("#### 💡 Recommended Mitigation Strategies")
-        if result.mitigation_strategies:
-            strat_data = [
-                {
-                    "Strategy": s.strategy_name,
-                    "Impact": s.expected_impact,
-                    "Timeframe": s.timeframe,
-                    "Implementation": s.description
-                }
-                for s in result.mitigation_strategies
-            ]
-            st.table(strat_data)
-            
-        st.divider()
-        st.markdown("### Financial Q&A")
-
-        for msg in st.session_state.fin_message_history:
-            role = "user" if isinstance(msg, HumanMessage) else "assistant"
-            with st.chat_message(role):
-                st.write(msg.content)
-
-        if fin_user_input := st.chat_input("Ask a question about the financial report...", key="fin_chat"):
-            with st.chat_message("user"):
-                st.write(fin_user_input)
-
-            with st.spinner("Processing query..."):
-                res = st.session_state.financial_result
-                analysis_context = f"Overall Risk: {res.overall_risk_level} (Score: {res.risk_score_100}/100)\n"
-                analysis_context += f"Executive Summary: {res.summary_explanation}\n"
-                analysis_context += "Risk Factors: " + "; ".join([r.factor_name for r in res.risk_factors]) + "\n"
-                analysis_context += "Mitigation Strategies: " + "; ".join([s.strategy_name for s in res.mitigation_strategies]) + "\n"
-
-                fin_assistant_response = chat(
-                    query=fin_user_input,
-                    chat_history=st.session_state.fin_message_history,
-                    analysis_context=analysis_context,
+                st.metric(
+                    label="Overall Severity",
+                    value=result.overall_risk_level
                 )
 
-            with st.chat_message("assistant"):
-                st.write(fin_assistant_response)
+            with col_summary:
+                st.markdown("**Executive Summary**")
+                st.info(result.summary_explanation)
+                
+            st.divider()
+            
+            st.markdown("#### ⚠️ Key Risk Factors Identified")
+            if result.risk_factors:
+                for r in result.risk_factors:
+                    if r.severity in ["High", "Critical"]:
+                        color = "#ef4444" # red
+                        bg_color = "#fef2f2"
+                    elif r.severity == "Medium":
+                        color = "#f59e0b" # yellow/orange
+                        bg_color = "#fffbeb"
+                    else:
+                        color = "#10b981" # green
+                        bg_color = "#ecfdf5"
+                    
+                    st.markdown(f"""
+                    <div style="border-left: 6px solid {color}; padding: 18px; margin-bottom: 20px; background-color: {bg_color}; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
+                            <h4 style="margin: 0; color: #1e3a8a; font-size: 18px; font-weight: 700;">{r.factor_name}</h4>
+                            <span style="background-color: {color}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 4px {color}40;">{r.severity} Risk</span>
+                        </div>
+                        <div style="color: #1f2937;">
+                            <p style="margin: 8px 0; font-size: 15px;"><strong>📉 Affected Metric:</strong> <span style="background-color: rgba(0,0,0,0.05); padding: 3px 8px; border-radius: 4px;">{r.affected_metric}</span></p>
+                            <p style="margin: 12px 0 0 0; font-size: 16px; line-height: 1.6;"><strong>⚠️ Details:</strong><br/>{r.description}</p>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+            st.markdown("#### 💡 Recommended Mitigation Strategies")
+            if result.mitigation_strategies:
+                strat_data = [
+                    {
+                        "Strategy": s.strategy_name,
+                        "Impact": s.expected_impact,
+                        "Timeframe": s.timeframe,
+                        "Implementation": s.description
+                    }
+                    for s in result.mitigation_strategies
+                ]
+                st.table(strat_data)
 
-            st.session_state.fin_message_history.append(HumanMessage(content=fin_user_input))
-            st.session_state.fin_message_history.append(AIMessage(content=fin_assistant_response))
+        # ── Chat Section ─────────────────────────────────────────────────────────────
+        with col_chat:
+            st.markdown("### 💬 Financial Q&A Bot")
+            st.info("Ask me anything about the uploaded financial reports!")
+            
+            chat_container_fin = st.container(height=500)
+            with chat_container_fin:
+                for msg in st.session_state.fin_message_history:
+                    role = "user" if isinstance(msg, HumanMessage) else "assistant"
+                    with st.chat_message(role):
+                        st.write(msg.content)
+
+            if fin_user_input := st.chat_input("Ask a question about the financial report...", key="fin_chat"):
+                with chat_container_fin:
+                    with st.chat_message("user"):
+                        st.write(fin_user_input)
+
+                    with st.spinner("Processing query..."):
+                        res = st.session_state.financial_result
+                        analysis_context = f"Overall Risk: {res.overall_risk_level} (Score: {res.risk_score_100}/100)\n"
+                        analysis_context += f"Executive Summary: {res.summary_explanation}\n"
+                        analysis_context += "Risk Factors: " + "; ".join([r.factor_name for r in res.risk_factors]) + "\n"
+                        analysis_context += "Mitigation Strategies: " + "; ".join([s.strategy_name for s in res.mitigation_strategies]) + "\n"
+
+                        fin_assistant_response = chat(
+                            query=fin_user_input,
+                            chat_history=st.session_state.fin_message_history,
+                            analysis_context=analysis_context,
+                        )
+
+                    with st.chat_message("assistant"):
+                        st.write(fin_assistant_response)
+
+                st.session_state.fin_message_history.append(HumanMessage(content=fin_user_input))
+                st.session_state.fin_message_history.append(AIMessage(content=fin_assistant_response))
