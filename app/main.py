@@ -84,8 +84,13 @@ if "financial_analysis_done" not in st.session_state:
     st.session_state.fin_message_history = []
 
 # ── Header ───────────────────────────────────────────────────────────────────
-st.markdown('<h1 class="gradient-text">⚖️ Legality Simplified</h1>', unsafe_allow_html=True)
-st.markdown('<h3 style="color: white; font-weight: 400;">Legal and Financial Risk Management Platform</h3>', unsafe_allow_html=True)
+st.markdown("""
+<div style="text-align: center; padding: 3rem 1rem; margin-bottom: 2rem; background: linear-gradient(180deg, rgba(30,58,138,0.1) 0%, rgba(0,0,0,0) 100%); border-radius: 16px; border-top: 1px solid rgba(59, 130, 246, 0.2);">
+    <h1 class="gradient-text" style="font-size: 4rem; margin-bottom: 0; line-height: 1.2;">Legality Simplified</h1>
+    <h3 style="color: #cbd5e1; font-weight: 300; margin-top: 10px; font-size: 1.5rem;">Intelligent Legal & Financial Risk Management</h3>
+    <p style="color: #94a3b8; font-size: 1.1rem; max-width: 700px; margin: 20px auto 0; line-height: 1.6;">Upload your contracts and financial reports. Our advanced AI will instantly extract critical clauses, evaluate hidden liabilities, and provide actionable mitigation strategies to protect your business.</p>
+</div>
+""", unsafe_allow_html=True)
 
 tab1, tab2 = st.tabs(["Legal Document Analysis", "Financial Risk Management"])
 
