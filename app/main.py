@@ -38,19 +38,30 @@ st.markdown("""
         color: #1e3a8a;
     }
     .stButton>button {
-        background-color: #1e3a8a;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
         color: white;
-        border-radius: 4px;
+        border-radius: 8px;
         border: none;
-        padding: 0.5rem 1rem;
-        font-weight: 500;
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .stButton>button:hover {
-        background-color: #172554;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        background: linear-gradient(135deg, #172554 0%, #2563eb 100%);
+        color: white;
     }
     .metric-value {
         font-size: 1.5rem;
         font-weight: bold;
+    }
+    .gradient-text {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -70,8 +81,8 @@ if "financial_analysis_done" not in st.session_state:
     st.session_state.fin_message_history = []
 
 # ── Header ───────────────────────────────────────────────────────────────────
-st.title("LegalitySimplified")
-st.subheader("Legal and Financial Risk Management Platform")
+st.markdown('<h1 class="gradient-text">⚖️ LegalitySimplified</h1>', unsafe_allow_html=True)
+st.markdown('<h3 style="color: #64748b; font-weight: 400;">Next-Gen Legal and Financial Risk Management Platform</h3>', unsafe_allow_html=True)
 
 tab1, tab2 = st.tabs(["Legal Document Analysis", "Financial Risk Management"])
 
@@ -146,13 +157,15 @@ with tab1:
                     bg_color = "#ecfdf5"
 
                 st.markdown(f"""
-                <div style="border-left: 6px solid {color}; padding: 15px; margin-bottom: 15px; background-color: {bg_color}; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <h4 style="margin: 0; color: #1e3a8a; font-size: 18px;">{clause_name}</h4>
-                        <span style="background-color: {color}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 14px; font-weight: 600;">{risk} Risk</span>
+                <div style="border-left: 6px solid {color}; padding: 18px; margin-bottom: 20px; background-color: {bg_color}; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
+                        <h4 style="margin: 0; color: #1e3a8a; font-size: 20px; font-weight: 700;">{clause_name}</h4>
+                        <span style="background-color: {color}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 4px {color}40;">{risk} Risk</span>
                     </div>
-                    <p style="margin: 5px 0;"><strong>Type:</strong> {clause_type} ({confidence})</p>
-                    <p style="margin: 5px 0; font-size: 15px;">{explanation}</p>
+                    <div style="color: #1f2937;">
+                        <p style="margin: 8px 0; font-size: 15px;"><strong>🏷️ Classification:</strong> <span style="background-color: rgba(0,0,0,0.05); padding: 3px 8px; border-radius: 4px;">{clause_type}</span> <span style="font-size: 0.9em; color: #6b7280;">({confidence})</span></p>
+                        <p style="margin: 12px 0 0 0; font-size: 16px; line-height: 1.6;"><strong>⚠️ Detailed Analysis:</strong><br/>{explanation}</p>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -246,13 +259,15 @@ with tab2:
                     bg_color = "#ecfdf5"
                 
                 st.markdown(f"""
-                <div style="border-left: 6px solid {color}; padding: 15px; margin-bottom: 15px; background-color: {bg_color}; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <h4 style="margin: 0; color: #1e3a8a;">{r.factor_name}</h4>
-                        <span style="background-color: {color}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 14px; font-weight: 600;">{r.severity} Risk</span>
+                <div style="border-left: 6px solid {color}; padding: 18px; margin-bottom: 20px; background-color: {bg_color}; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
+                        <h4 style="margin: 0; color: #1e3a8a; font-size: 18px; font-weight: 700;">{r.factor_name}</h4>
+                        <span style="background-color: {color}; color: white; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 4px {color}40;">{r.severity} Risk</span>
                     </div>
-                    <p style="margin: 5px 0;"><strong>📉 Affected Metric:</strong> {r.affected_metric}</p>
-                    <p style="margin: 5px 0; font-size: 15px;">{r.description}</p>
+                    <div style="color: #1f2937;">
+                        <p style="margin: 8px 0; font-size: 15px;"><strong>📉 Affected Metric:</strong> <span style="background-color: rgba(0,0,0,0.05); padding: 3px 8px; border-radius: 4px;">{r.affected_metric}</span></p>
+                        <p style="margin: 12px 0 0 0; font-size: 16px; line-height: 1.6;"><strong>⚠️ Details:</strong><br/>{r.description}</p>
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
             

@@ -23,7 +23,7 @@ identified the clause type. Your job is to assess the risk and explain clearly.
 
 ### Instructions:
 1. Assess the **risk level**: only "Low", "Medium", or "High".
-2. Explain briefly and clearly in 40-50 words why you assigned this risk level.
+2. Explain clearly in detail (75-150 words) exactly why you assigned this risk level. Break down the specific threats and implications.
 3. Consider factors like: enforceability, one-sidedness, potential for disputes,
    financial exposure, and how common/standard this clause wording is.
 
@@ -46,7 +46,7 @@ You will analyze the following document and segregate the clauses and assign it 
 ### Instructions:
 1. Identify the main purpose of the clause in simple English from the given document.
 2. Assess the **risk level**: only "Low", "Medium", or "High".
-3. Explain briefly and clearly with 40-50 words explanation why you assigned this risk level.
+3. Explain clearly in detail (75-150 words) exactly why you assigned this risk level, breaking down specific threats and what could happen.
 
 Return the result strictly in the format defined by the provided schema.
 Do not include any text outside the schema.
