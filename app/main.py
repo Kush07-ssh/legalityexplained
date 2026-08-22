@@ -15,6 +15,9 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import streamlit as st
+import plotly.graph_objects as go
+import plotly.express as px
+import pandas as pd
 from langchain_core.messages import AIMessage, HumanMessage
 
 from app.services.analyzer import analyze
@@ -128,6 +131,25 @@ with tab1:
         if st.session_state.show_risk_analysis:
             st.markdown("### Risk Level Analysis")
 
+            # ── Graph: Risk Breakdown ──
+            risk_counts = {"High": 0, "Medium": 0, "Low": 0}
+            for row in st.session_state.all_rows:
+                r_level = row.get("Risk Level", "Unknown")
+                if r_level in risk_counts:
+                    risk_counts[r_level] += 1
+            
+            # Draw bar chart
+            fig_bar = px.bar(
+                x=list(risk_counts.keys()), 
+                y=list(risk_counts.values()),
+                labels={'x': 'Risk Severity', 'y': 'Number of Clauses'},
+                title="Clause Risk Breakdown",
+                color=list(risk_counts.keys()),
+                color_discrete_map={"High": "#ef4444", "Medium": "#f59e0b", "Low": "#10b981"}
+            )
+            fig_bar.update_layout(showlegend=False, height=350, margin=dict(l=0, r=0, t=40, b=0))
+            st.plotly_chart(fig_bar, use_container_width=True)
+
             risk_colors = {
                 "High": "High Risk",
                 "Medium": "Medium Risk",
@@ -223,22 +245,37 @@ with tab2:
         
         result = st.session_state.financial_result
         
-        col_score, col_risk, col_summary = st.columns([1, 1, 2])
+        col_score, col_summary = st.columns([1, 2])
         
         with col_score:
-            st.metric(
-                label="Risk Score (out of 100)",
-                value=f"{result.risk_score_100} / 100",
-                delta="High Risk" if result.risk_score_100 > 70 else ("Medium Risk" if result.risk_score_100 > 30 else "Low Risk"),
-                delta_color="inverse"
-            )
-
-        with col_risk:
+            fig_gauge = go.Figure(go.Indicator(
+                mode = "gauge+number",
+                value = result.risk_score_100,
+                domain = {'x': [0, 1], 'y': [0, 1]},
+                title = {'text': "Financial Risk Score"},
+                gauge = {
+                    'axis': {'range': [None, 100]},
+                    'bar': {'color': "#1e3a8a"},
+                    'steps': [
+                        {'range': [0, 30], 'color': "#ecfdf5"},
+                        {'range': [30, 70], 'color': "#fffbeb"},
+                        {'range': [70, 100], 'color': "#fef2f2"}
+                    ],
+                    'threshold': {
+                        'line': {'color': "red", 'width': 4},
+                        'thickness': 0.75,
+                        'value': result.risk_score_100
+                    }
+                }
+            ))
+            fig_gauge.update_layout(height=250, margin=dict(l=10, r=10, t=40, b=10))
+            st.plotly_chart(fig_gauge, use_container_width=True)
+            
             st.metric(
                 label="Overall Severity",
                 value=result.overall_risk_level
             )
-            
+
         with col_summary:
             st.markdown("**Executive Summary**")
             st.info(result.summary_explanation)
