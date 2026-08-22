@@ -104,6 +104,7 @@ with tab1:
         type=["pdf", "txt"],
         key="legal_upload"
     )
+    st.caption("🔒 **Data Privacy & Security:** Uploaded documents are processed in memory and are never stored permanently on our servers. Please ensure you have the right to upload these documents and avoid uploading highly sensitive proprietary data.")
 
     # ── Analysis ─────────────────────────────────────────────────────────────────
     if uploaded_files and not st.session_state.analysis_done:
@@ -240,6 +241,7 @@ with tab2:
         type=["pdf", "txt", "csv"],
         key="fin_upload"
     )
+    st.caption("🔒 **Data Privacy & Security:** Uploaded financial data is processed in memory and is never stored permanently on our servers. Avoid uploading highly confidential insider data.")
 
     if fin_uploaded_files and not st.session_state.financial_analysis_done:
         with st.spinner("Analyzing financial data and extracting risk factors..."):
