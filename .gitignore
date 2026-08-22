@@ -5,7 +5,7 @@
 database/
 
 # Fine-tuned models
-models/
+/models/
 
 # Python
 __pycache__/
