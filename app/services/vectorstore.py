@@ -53,7 +53,6 @@ def create_vectorstore(pages: List[Document]) -> Chroma:
             embeddings,
             persist_directory=PERSIST_DIR,
         )
-        vectorstore.persist()
     else:
         vectorstore = Chroma(
             persist_directory=PERSIST_DIR,
