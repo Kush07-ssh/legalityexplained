@@ -9,6 +9,11 @@ Main entry point for the web UI. Provides:
 - Financial Report Risk Management (Gemini)
 """
 
+import sys
+import os
+# Ensure the root project directory is in the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import streamlit as st
 from langchain_core.messages import AIMessage, HumanMessage
 
