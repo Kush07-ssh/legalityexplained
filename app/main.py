@@ -12,7 +12,9 @@ Main entry point for the web UI. Provides:
 import sys
 import os
 # Ensure the root project directory is in the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
 
 import streamlit as st
 import plotly.graph_objects as go
