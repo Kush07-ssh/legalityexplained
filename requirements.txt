@@ -23,6 +23,7 @@ sentence-transformers>=2.2.0
 
 # ── BERT Fine-Tuning ──
 torch>=2.0.0
+torchvision>=0.15.0
 transformers>=4.35.0
 datasets>=2.14.0
 accelerate>=0.25.0
